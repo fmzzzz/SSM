@@ -1,0 +1,96 @@
+package zh.login.Service.impl;
+
+import javax.annotation.Resource;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import zh.login.Controller.LoginController;
+import zh.login.Dao.LoginDao;
+import zh.login.Service.LoginService;
+import zh.utils.MD5Utils;
+
+/**
+ * @comment:用户登录逻辑层接口实现类
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:20
+ */
+@Service
+public class LoginServiceBean implements LoginService{
+
+	@Resource
+	private LoginDao loginDao;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(LoginController.class);
+	
+	
+	
+	
+	
+	/**
+	 * @comment: 用户登陆逻辑
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月20日上午10:57:40
+	 * @param username
+	 * @param pwd
+	 * @return
+	 */
+	@Override
+	public String login(String username, String pwd) {
+		/**
+		 * 校验参数
+		 */
+		if(StringUtils.isEmpty(username)) {
+			return "{result:'500',msg:'请填写用户名'}";
+		}
+		
+		if(StringUtils.isEmpty(pwd)) {
+			return "{result:'500',msg:'请填写密码'}";
+		}
+		
+		/**
+		 * 查询是否存在该用户
+		 */
+		int count =Integer.MIN_VALUE;
+		try {
+			count = loginDao.countNumByUsname(username.trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用login---loginDao---countNumByUsname---系统异常");
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		if(count<=0) {
+			return "{result:'500',msg:'用户名或密码错误，请检查'}";
+		}
+		
+		/**
+		 * 查询对应的密码
+		 */
+		String pwdDb = "";
+		try {
+			pwdDb = loginDao.findPwdInDbByUsername(username.trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用login---loginDao---findPwdInDbByUsername---系统异常");
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		
+		if(!MD5Utils.toMd5(pwd.trim()).equals(pwdDb)){
+			return "{result:'500',msg:'用户名或密码错误，请检查'}";
+		}
+		return "{result:'502',msg:'登陆成功'}";
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		String str = "";
+		System.out.println(StringUtils.isEmpty(str));
+	}
+
+}

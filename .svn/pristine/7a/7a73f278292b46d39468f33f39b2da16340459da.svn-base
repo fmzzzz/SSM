@@ -1,0 +1,116 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE>
+<html>
+	<head>
+		<base href="<%=basePath%>">
+		<meta HTTP-EQUIV="pragma" CONTENT="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<link rel="stylesheet" href="css/login.css" />
+		<title>用户登录-灵台县教育云平台</title>
+		<script type="text/javascript" src="<%=basePath%>js/jquery-1.7.1.min.js"></script>
+	</head>
+	<body>
+	
+		<div id="header">
+			<div class="header_title">
+				<span class="title_con">石阡县教育云平台</span>
+			</div>
+		</div>
+	
+		<div id="content">
+			<center>
+				<div class="con">
+					<div class="con_title">
+						<span class="con_title_sp">欢迎登录</span>
+					</div>
+					<div class="con_panel">
+						<div class="con_input">
+							<span>用户名：</span><input id="username" type="text" placeholder="请输入用户名"/>
+						</div>
+						<div class="con_input">
+							<span>密&nbsp;&nbsp;&nbsp;&nbsp;码：</span><input id="userpwd" type="password" placeholder="请输入密码"/>
+						</div>
+						<input type="submit" value="登    录" class="submit-btn" onclick="submitLogin()"/>
+					</div>
+				</div>
+			</center>
+<!-- 			<div id="footer"> -->
+<!-- 				<center> -->
+<!-- 					@版权所有 @傅里叶级数 -->
+<!-- 				</center> -->
+<!-- 			</div> -->
+		</div>
+	
+		<div style="height: 50px;line-height: 40px;bottom: 0px;position: absolute;width: 100%;" align="center">
+			<label style="font-weight: bold;font-size: 12px;color: #333333;font-family: '黑体';letter-spacing:5px;">技术支持：傅里叶级数</label>
+		</div>
+		
+		
+		
+		<script type="text/javascript">
+			
+			<!-- 页面加载完成 -->
+			$(document).ready(function(){
+				//绑定回车登录事件
+				document.onkeydown = function(e){
+					var ev = document.all ? window.event : e;
+					if(ev.keyCode==13){
+						submitLogin();
+					}
+				};
+			});
+			
+			// 登录
+			function submitLogin(){
+				console.info("进入登录方法");				
+				//获取用户名
+				var usname=$.trim($("#username").val());
+				console.info(usname);
+				//获取密码
+				var pwd=$.trim($("#userpwd").val());
+				console.info(pwd);
+				if(usname == "" || usname.length<=0){
+					alert("请输入用户名");
+					$("#username").focus();
+					return;
+				}
+				if(pwd == "" || pwd.length<=0){
+					alert("请输入密码");
+					$("#userpwd").focus();
+					return;
+				}
+				
+				// 登录
+				$.ajax({
+					url:"login.htm",
+					type:"POST",
+					// 同步
+					async: false,
+					data : {
+						username : usname,
+						password : pwd
+					},
+					success : function(r){
+						r = $.parseJSON(r);
+						if(r.result=="500"){
+							$('#pwd').focus();
+							$('#code').val("");
+							$('#pwd').val("");
+							alert(r.msg);
+						}else if(r.result=="502"){
+							alert("OK");
+							window.location.href="mainPage_show.htm";
+						}
+					},
+					error : function(){
+						alert("系统异常，请联系管理员");
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

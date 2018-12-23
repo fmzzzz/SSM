@@ -1,0 +1,53 @@
+package zh.beans;
+
+/**
+ * @comment:系统用户表实体
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:32:32
+ */
+public class SysUsersBean {
+
+	/**
+	 * 用户系统编号
+	 */
+	private String usid;
+	/**
+	 * 用户名
+	 */
+	private String usname;
+	/**
+	 * 密码
+	 */
+	private String password;
+	public String getUsid() {
+		return usid;
+	}
+	public void setUsid(String usid) {
+		this.usid = usid;
+	}
+	public String getUsname() {
+		return usname;
+	}
+	public void setUsname(String usname) {
+		this.usname = usname;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
+	/**
+	 * @comment: toString方法，与用户信息安全有关的东西不能写在toString中
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月20日上午9:36:14
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		return "SysUsersBean:usname:"+this.usname+"|usid:"+this.usid;
+	}
+	
+}

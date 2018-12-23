@@ -1,0 +1,10 @@
+package zh.login.Dao;
+
+/**
+ * @comment:用户登录数据库连接层
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:39
+ */
+public interface LoginDao {
+	
+}

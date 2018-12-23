@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+	<display-name>ssm三大框架整合教学</display-name>
+	<!-- Spring 的配置文件-->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+	
+	<!-- 编码过滤器 -->
+	<!-- 它使用户可以改变一个request和修改一个response. Filter 不是一个servlet，它不能产生一个response，
+	它能够在一个request到达servlet之前预处理request，也可以在response离开servlet时处理response.
+	换种说法，filter其实是一个“servlet chaining“（servlet 链）.
+	包括
+		1. 在servlet被调用之前截获；
+		2. 在servlet被调用之前检查servlet request;
+		3. 根据需要修改request头和request数据；
+		4. 根据需要修改response头和response数据；
+		5. 在servlet被调用之后截获.
+			你能够配置一个filter 到一个或多个servlet；单个servlet或servlet组能够被多个filter 使用。几个实用的filter 包括：用户辨认filter，日志filter，审核filter，加密filter，符号filter，能改变xml内容的XSLT filter等。
+			一个filter必须实现javax.servlet.Filter。 -->
+	<filter> 
+		<filter-name>encodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>encodingFilter</filter-name>
+		<url-pattern>*.htm</url-pattern>
+	</filter-mapping>
+	
+	<!-- Spring的监听器 -->
+		<!-- ContextLoaderListener监听器的作用就是启动Web容器时，自动装配ApplicationContext的配置信息。因为它实现了ServletContextListener这个接口，在web.xml配置这个监听器，启动容器时，就会默认执行它实现的方法。至于ApplicationContext.xml这个配置文件部署在哪，如何配置多个xml文件，书上都没怎么详细说明。现在的方法就是查看它的API文档。在ContextLoaderListener中关联了ContextLoader这个类，所以整个加载配置过程由ContextLoader来完成。看看它的API说明。
+		第一段说明ContextLoader可以由 ContextLoaderListener和ContextLoaderServlet生成。如果查看ContextLoaderServlet的API，可以看到它也关联了ContextLoader这个类而且它实现了HttpServlet这个接口。
+		 第二段，ContextLoader创建的是 XmlWebApplicationContext这样一个类，它实现的接口是WebApplicationContext->ConfigurableWebApplicationContext->ApplicationContext->BeanFactory这样一来spring中的所有bean都由这个类来创建 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	<!--  在Web应用程序关闭时IntrospectorCleanupListener将会刷新JDK的JavaBeans的Introspector缓存。在你的web.xml中注册这个listener来确保Web应用程序的类加载器以及其加载的类正确的释放资源。 -->
+	<!-- IntrospectorCleanupListener监听器以解决框架可能产生的内存泄露问题 -->
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+	
+	<!-- SpringMCV的配置文件 -->
+	<servlet>
+		<servlet-name>SpringMVC</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<!-- 配置文件的名称 -->
+			<param-value>classpath:applicationServlet.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<!-- .htm结尾的请求都要经过拦截过滤，然后disparcherServlet分发到各个Controller -->
+	<servlet-mapping>
+		<servlet-name>SpringMVC</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
+	
+	<!-- session超时时间 -->
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+
+	
+	<!-- 欢迎页 -->
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

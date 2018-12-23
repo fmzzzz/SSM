@@ -1,0 +1,641 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page isELIgnored="false" %>
+<%
+String path = request.getContextPath() ;
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE>
+<html>
+  <head>
+    <title>${resultMap.SYSVALUE}-主页</title>
+    <!-- 登录框 -->
+	<link rel="stylesheet" type="text/css" href="<%=basePath %>css/down_load_login.css"> 
+    <!-- jquery-1.7.1 -->
+    <script type="text/javascript" src="<%=basePath %>js/jquery-1.7.1.min.js"></script>
+    
+    <!-- EasyUI -->
+	<script type="text/javascript" src="<%=basePath %>js/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="<%=basePath %>js/jquery-easyui-1.4.2/locale/easyui-lang-zh_CN.js"></script>
+	<link rel="stylesheet" type="text/css" href="<%=basePath %>js/jquery-easyui-1.4.2/themes/gray/easyui.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath %>js/jquery-easyui-1.4.2/themes/icon.css" />
+	
+	<!-- jquery form -->
+	<script type="text/javascript" src="<%=basePath %>js/jquery.form.js"></script>
+	
+	<!-- datagrid序号自适应 -->
+	<script type="text/javascript" src="<%=basePath%>js/datagrid_rownumber.js"></script>
+	
+	<!-- 行按钮图标样式 -->
+	<link rel="stylesheet" href="css/rowButton/rowButton.css" type="text/css" />
+	
+	<!-- 首页左上角字体效果 -->
+	<script type="text/javascript" src="js/sysset/sysset.js" ></script>
+	<link rel="stylesheet" href="css/sysset/sysset.css" />
+	<!-- 菜单列表 -->
+	<link rel="stylesheet" href="<%=basePath%>css/menu_left.css" type="text/css" />
+	<link href="<%=basePath%>css/font-awesome.css" rel="stylesheet" media="screen">
+	
+	<link rel="stylesheet" href="<%=basePath%>css/sidebar-menu.css">
+	
+	
+	<!--  -->
+	<style type="text/css">
+		*, *::after, *::before{
+		    box-sizing: border-box;
+		}
+		.ibx-uc-uimg-mask {
+		   background-attachment: scroll;
+		   background-clip: border-box;
+		   background-color: rgba(0, 0, 0, 0);
+		   background-image: url("images/index/morentup.jpg");
+		   background-origin: padding-box;
+		   background-repeat: no-repeat;
+		   background-size: 60px 60px;
+		   cursor: pointer;
+		   height: 60px;
+		   width: 60px;
+		   z-index: 2;
+		   border-radius:12px 12px ;
+		}
+		.ibx-uc-uimg-mask:hover{
+			box-shadow:0px 0px 4px #fffffb;
+		}
+		.ibx-uc-img {
+			cursor: pointer;
+			border-radius:12px 12px ;
+		    height: 60px;
+		    width: 60px;
+		}
+		.ibx-uc-img:hover{
+			box-shadow:0px 0px 4px #fffffb;
+		}
+		.pass-portrait-file {
+		    font-size: 30px;
+		    height: 38px;
+		    left: 0;
+		    opacity: 0;
+		    position: absolute;
+		    top: 0;
+		    width: 130px;
+		}
+		.sysset_a{
+			-webkit-transition: all 0.5s;
+			-moz-transition: all 0.5s;
+			transition: all 0.5s;
+			color: #fff;
+			font-weight: bold;
+			font-size: 12px;
+			text-decoration: none;
+			cursor: url('css/Cursors/Cursor.cur'),pointer;
+		}
+		.sysset_a:HOVER{
+			color:#f47920;
+		}
+		.sysset_ewm{
+			cursor: url('css/Cursors/Cursor.cur'),pointer;
+			height: 25px;
+			line-height: 40px;
+			vertical-align:middle;
+			margin-right: 35px;
+		}
+		.sysset_a img{
+			vertical-align:middle;
+			width: 23px;
+		}
+		.sysset_a img:HOVER{
+			box-shadow:0px 0px 4px #fffffb;
+		}
+		.sysset_ewm_div{
+			position:fixed;
+			z-index:100;
+			font-family:"Microsoft YaHei";
+			right: 10px;
+			display:none;
+			font-size: 14px;
+			color: #fff;
+			padding: 10px 5px;
+			bottom: 40px;
+			text-align:center;
+		}
+		
+		
+		
+		
+		/*菜单模块*/
+		.mk_div{
+	    height:95px;width:100px;background:;float:left;margin-top:10px;cursor:pointer;float:left;margin-left:2%;
+	    }
+	    .mk_div:hover .mk_img_div img{
+	    background:;border-radius:5px;box-shadow:1px 0px 8px rgba(255,255,255,1)
+	    }
+	    .mk_img_div{
+	    height:40%;width:40%;margin-top:10%;margin-left:auto;margin-right:auto;background:; border-radius:3px;
+	    }
+	    .mk_img_div img{
+	    height:100%;width:100%;
+	    }
+	    .mk_text_div{
+	    height:;color:#333;line-height:24px;width:100%;text-align:center;text-overflow:ellipsis; overflow: hidden;white-space: nowrap;
+	    }
+	    .mk_text_div span{
+	    line-height:30px;font-size:12px;color:#333;
+	    }
+	    .close_div{
+		    height:36px;width:36px;position:absolute;right:0;top:0;cursor:pointer;background:rgba(3,3,3,0.3);
+		    background:;z-index:100000;border-radius:0px 0px 0px 36px;
+	    }
+	    .close_div .close_img{
+	    	height:36px;width:36px;background:url('images/menu_left/zk/bs.png')no-repeat;background-size:50% 50%;
+	    	margin-top:5px;margin-left:13px;
+	    }
+	    .close_div:hover .close_img{
+	    	background:url('images/menu_left/zk/qts.png')no-repeat;background-size:50% 50%
+	    }
+	    
+	    
+		.main-sidebar{
+			top: 0;
+			left: 0;
+			height: 100%;
+			min-height: 100%;
+			width: 200px;
+			z-index: 810;
+			background-color: rgba(255,255,255,0.8);
+		 }
+		 
+		 .tips_css{
+		 	display:none;
+		 	position:absolute;
+		 	top: 50;
+			left: 1000;
+		 	height:80px;
+		 	width:200px;
+		 	background:url('img/mainPage/tipsqp.png')no-repeat;
+		 	background-size:100% 100%;
+		 	z-index: 8999;
+		 	padding-top:10px;
+		 	padding-left:5px;
+		 	padding-right:5px;
+		 }
+		 .dialog_background{
+		 	background:url('img/mainPage/bindDialogBg.png')no-repeat;
+		 	background-size:100% 100%;
+		 }
+		 #disable_getValidationCodeId {
+            pointer-events: none;
+            filter: alpha(opacity=50); /*IE滤镜，透明度50%*/
+            -moz-opacity: 0.5; /*Firefox私有，透明度50%*/
+            opacity: 0.5; /*其他，透明度50%*/
+        }
+        .showCurrentPositionDiv{
+			min-width:90px;
+			width:auto;
+			background-color: rgb(4, 120, 181);
+			position: absolute;
+			top: 92px;
+			right: 2px;
+			z-index: 999;
+			display: none;
+			overflow:none;
+			height:30px;
+			line-height: 30px;
+		}
+	</style>
+	
+  </head>
+  
+  
+  <body class="easyui-layout" id='motherboard' style="overflow: hidden;">
+  
+  		<!-- 密码修改 -->
+		<div id="sysertUpdatePwdDialog" class="easyui-dialog" title="修改密码" closed="true" modal="true" style="width:400px;height:270px;padding-top:20px;" iconCls="icon-key">
+			<table id="sysertUpdatePwdDialogTable" align="center" cellpadding="0"cellspacing="0" style="width: 90%;">
+				<tr>
+					<td align="right" style="padding: 10px 0px 10px 0px;">
+						<label style="font-size: 12px;">请输入原密码:&nbsp;&nbsp;</label>
+					</td>
+					<td align="left" style="padding: 10px 0px 10px 0px;">
+						<input type="password" id="oldpwd"/>
+					</td>
+				</tr>
+				<tr>
+					<td align="right" style="padding: 10px 0px 10px 0px;">
+						<label style="font-size: 12px;">请输入新密码:&nbsp;&nbsp;</label>
+					</td>
+					<td align="left" style="padding: 10px 0px 10px 0px;">
+						<input type="password" id="newpwd"/>
+					</td>
+				</tr>
+				<tr>
+					<td align="right" style="padding: 10px 0px 10px 0px;">
+						<label style="font-size: 12px;">请再次输入新密码:&nbsp;&nbsp;</label>
+					</td>
+					<td align="left" style="padding: 10px 0px 10px 0px;">
+						<input type="password" id="vfpwd"/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center" style="padding: 10px 0px 10px 0px;">
+						<label style="font-size: 12px;color: #999d9c;">(用户名和密码作为进入平台的唯一凭证，请牢记)</label>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center" style="padding: 10px 0px 10px 0px;">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick="syssetupdatepwdsubmit();">保存</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		
+		
+		
+  		<!-- 顶部 -->
+  		<div region="north" style="overflow:hidden;height:90px;background-color:#0478B5;border: 0px;">
+  			<table style="width: 100%;height: 90px;" >
+  				<tr>
+  					<td style="padding: 0px 0px 0px 10px;">
+  						<label class="cd-headline letters rotate-3" style="font-weight: bold;font-size:45px;color: #fff;font-family: '黑体';">
+			  				<span class="cd-words-wrapper">
+								<b class="is-visible">${resultMap.SYSVALUE }</b>
+								<b>${resultMap.SYSVALUE }</b>
+								<b>${resultMap.SYSVALUE }</b>
+							</span>
+						</label>
+  					</td>
+  					<td rowspan="2">
+  						<table style="width: 100%;">
+  							<tr>
+  								<td align="right" style="padding: 10px 40px 0px 0px;">
+  									<a href="javascript:void(0);" onclick="open_updatepwd_dialog();" class="sysset_a" title="修改密码">
+  										<img src="img/mainPage/newkey.png"/>
+  									</a>
+  									&nbsp;&nbsp;&nbsp;&nbsp;
+  									<a href="exit_login_users.htm" class="sysset_a" title="退出平台">
+  										<img src="img/mainPage/newstop.png"/>
+  									</a>
+  								</td>
+  							</tr>
+  						</table>
+  					</td>
+  				</tr>
+  			</table>
+  		</div>
+  		
+  		<script type="text/javascript">
+			$(document).ready(function(){
+				$(".layout-button-left").click(function() {
+					$(".nav_class").fadeOut(500);
+				});
+			});
+		
+			$(document).ready(function(){
+				$(".close_img").click(function() {
+					$(".nav_class").fadeOut(100);
+				});
+			});
+		</script>
+  		
+  		
+  		<!-- 左侧功能模块 -->
+  		<div region="west" split="true" title="菜单模块"  style="width:170px;border: 0px;">
+			<!--左边列表start-->
+			<div class="main-sidebar">
+				<div class="sidebar">
+					<c:if test="${menuOneList ne null}">
+						<c:forEach items="${menuOneList}" var="menuMap">
+							<ul class="sidebar-menu">
+								<li class="treeview">
+									<a id="${menuMap.menuid}" href="#" style="padding: 10px 30px 30px 15px;" onclick = "javascript:tabMenuOne(),loadTwoMenuShow(this.id)">
+										<img src="img/mainPage/menu_icon.png" style="float:left;display:block;height:25px;width:35px;margin-right:10px;">
+											<span style="float:left;display: block;font-size: 16px;color: #0478B5;">${menuMap.menuname }</span>
+												<i class="fa fa-angle-right pull-right" style="float:right;padding:5px 0px 0px 0px;">
+												</i>
+									</a>
+									<ul class="treeview-menu" id ="" >
+									</ul>
+								</li>
+							</ul>
+						</c:forEach>
+					</c:if>
+				</div>
+			</div>
+		</div>
+		
+		
+	 	<!-- 二级菜单 -->
+		<div class="nav_class" id="nav_class1">
+			<!-- 关闭按钮 -->
+			<div class="close_div">
+				<div class="close_img"></div>
+			</div>
+			
+			<!-- 二级菜单 -->
+			<div id="menu_right_div" style="overflow: hidden; height: 88%; width: 100%;">
+			</div>
+			
+			<div style="clear:both"></div>
+			
+			<div id="change_number">
+<!-- 				 <a href="javascript:void('0')">1</a>  -->
+			</div>
+		</div>
+		<!-- 左边菜单end -->
+		
+		
+		
+		<script src="<%=basePath%>js/sidebar-menu.js"></script>
+		<script type="text/javascript">
+			$.sidebarMenu($('.sidebar-menu'));
+			
+		  	$(".cdc").click(function(){
+		  		$(".nav_class").fadeIn(500);
+		  	});
+			  	
+		  	function hid_div(){
+				  $(".nav_class").fadeOut();//隐藏div  
+			}
+		</script>	
+		
+		
+		<!-- 内容 -->
+		<div region="center" style="border: 0px;">
+			<!-- admin -->
+				<div id="domain" class="easyui-panel" href="" title="" fit="true" style="margin: 0px;padding: 0px;">
+				</div>
+		</div>
+  
+  		<!-- 底部 -->
+		<div region="south" style="background-color:#0478B5;height:40px;color:#fff;text-align:center;line-height: 38px;overflow: hidden;border: 0px;">
+			<table style="width: 100%;height: 40px;">
+				<tr>
+					<td style="padding-left: 20px;">
+						<label style="font-size: 12px;font-weight: bold;color: #fff;">版权所有:傅里叶级数</label>
+					</td>
+					<td>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<script type="text/javascript">  
+		
+			var sysData = "";
+		
+			//页面加载完成
+			$(document).ready(function(){
+// 				findAllNew_MenuList();
+			});
+			
+			
+// 			//查询菜单
+// 			function findAllNew_MenuList(){
+// 				$.ajax({
+// 					url:"findNewAllMenuListThree_Menus.htm",
+// 					type:"post",
+// 					async:false,
+// 					data:{
+// 						id : ''
+// 					},
+// 					success:function(r){ 
+// 						r=$.parseJSON(r);
+// 						var htmOne = "";
+// 						for(var i = 0; i < r.length; i++){
+// 							htmOne += "<li class=\"treeview\">";
+// 							htmOne += "	<a href=\"#\" style=\"padding: 10px 5px 30px 15px;\" onclick = \"javascript:tabMenuOne(),loadTwoMenuShow('"+r[i].id+"','"+r[i].text+"')\">";
+// 							if(r[i].ICON_SRC != null && r[i].ICON_SRC != ""){
+// 								htmOne += "		<img src='"+r[i].ICON_SRC+"' style='float:left;display:block;height:20px;width:20px;margin-right:25px;'></img>";
+// 								htmOne += "		<span style=\"float:left;display: block;font-size: 14px;color: #0478B5; \">"+r[i].text+"</span>";
+// 							}else{
+// 								htmOne += "		<span style=\"margin-left:45px;float:left;display: block;font-size: 14px;color: #0478B5; \">"+r[i].text+"</span>";
+// 							}
+// 							htmOne += "		<i id=\""+r[i].id+"i\" class=\"fa fa-angle-right pull-right\" style=\"float:right;padding:5px 0px 0px 0px;\"></i>";
+// 							htmOne += "	</a>";
+// 							htmOne += "	<ul class=\"treeview-menu\" id = \""+r[i].id+"\">";
+// 							htmOne += "	</ul>";
+// 							htmOne += "</li>";
+// 						}
+// 						$(".sidebar-menu").html(htmOne);
+// 					},
+// 					error:function(){
+// 						$.messager.alert("系统提示","服务器连接失败","error");
+// 						return;
+// 					}
+// 				});
+// 			}
+			
+			
+			
+			
+			//加载二级菜单
+			function loadTwoMenuShow(id){
+				$.ajax({
+					url:"findNewAllMenuListThree_Menus.htm",
+					type:"post",
+					async:false,
+					data:{
+						id : id
+					},
+					success:function(r){ 
+						r=$.parseJSON(r);
+						var htmOne = "";
+						var htmTwo = "";
+						for(var i = 0; i < r.length; i++){
+							if(r[i].ATTRIBUTES != null && r[i].ATTRIBUTES != ""){
+								htmTwo += "<div class='mk_div' onclick=\"refresh('"+r[i].ATTRIBUTES+"'),$('.nav_class').hide(),changeCurrentPosition('"+pname+"&gt;"+r[i].text+"');\">";
+								if(r[i].ICON_SRC == undefined || r[i].ICON_SRC == ""){ 
+									htmTwo += "<div class='mk_img_div'><img alt='' src='images/menu_left/zk/anfangjiankongdiaodu.png'></div>";
+								} else { 
+									htmTwo += "<div class='mk_img_div'><img alt='' src='"+r[i].ICON_SRC+"'></div>";
+								}
+								htmTwo += "<div class='mk_text_div'><span>"+r[i].text+"</span></div>"; 
+								htmTwo += "</div>";
+							}else{
+								htmOne += "<li onclick=\"javascript:tabMenu('"+r[i].id+"'),findThreeMenuShow('"+r[i].id+"','"+r[i].text+"')\"><a class=\"cdc\"><i class=\"fa fa-circle-o\"></i>"+r[i].text;
+								htmOne += "<i class=\"fa fa-angle-right pull-right\" style=\"color:#0478B5\"></i> ";
+								htmOne += "</a></li>";
+							}
+						}
+						if(htmTwo == ""){
+							var i = 0;
+							if($("#"+id+"i").attr("class") == "fa fa-angle-down pull-down"){
+								i = 1;
+							}
+							$(".sidebar-menu i").attr("class","fa fa-angle-right pull-right");
+							if(i == 0){
+								$("#"+id+"i").attr("class","fa fa-angle-down pull-down");
+							}
+							$("#"+id).html(htmOne);
+						}else{
+							$('.nav_class').hide();
+							$('#nav_class1').fadeIn(500);
+							$('#'+id).show().siblings('div').hide();
+							$("#change_number").html(htmTwo);
+						}
+					},
+					error:function(){
+						$.messager.alert("系统提示","服务器连接失败","error");
+						return;
+					}
+				});
+			}
+			
+			
+			
+			//一级菜单点击切换事件
+			function tabMenuOne(){
+				//检查是否登录超时
+				$.ajax({
+					url:"checkSession_index.htm",
+					type:"post",
+					async:false,
+					success:function(r){
+						r=$.parseJSON(r);
+						if(r.result=="500"){
+							alert(r.msg);
+							window.location.href="page_login_show.htm";
+							return;
+						}
+					},
+					error:function(){
+						$.messager.alert("系统提示","服务器连接失败","error");
+						return;
+					}
+				});
+			}
+			
+			
+			
+			
+			
+			
+			//二级菜单点击切换事件
+			function tabMenu(id){
+				//检查是否登录超时
+				$.ajax({
+					url:"checkSession_index.htm",
+					type:"post",
+					async:false,
+					success:function(r){
+						r=$.parseJSON(r);
+						if(r.result=="500"){
+							alert(r.msg);
+							window.location.href="page_login_show.htm";
+							return;
+						}
+					},
+					error:function(){
+						$.messager.alert("系统提示","服务器连接失败","error");
+						return;
+					}
+				});
+				$('.nav_class').hide();
+				$('#nav_class1').fadeIn(500);
+				$('#'+id).show().siblings('div').hide();
+			}
+			
+			
+			
+			
+			
+			
+			//打开修改密码窗口
+			function open_updatepwd_dialog(){
+				$("#sysertUpdatePwdDialog").dialog("open");
+			}
+			
+			
+			
+			//密码修改提交
+			function syssetupdatepwdsubmit(){
+				//原密码
+				var oldpwd=$("#oldpwd").val();
+				if(oldpwd==null || $.trim(oldpwd).length<=0){
+  					$.messager.alert("系统提示","请输入原密码","warning");
+  					return;
+  				}
+				//新密码
+				var newpwd=$("#newpwd").val();
+				if(newpwd==null || $.trim(newpwd).length<=0){
+  					$.messager.alert("系统提示","请输入新密码","warning");
+  					return;
+  				}
+				//确认密码
+				var vfpwd=$("#vfpwd").val();
+				if(vfpwd==null || $.trim(vfpwd).length<=0){
+  					$.messager.alert("系统提示","请再次输入新密码","warning");
+  					return;
+  				}
+				//判断两次新密码
+				if(newpwd!=vfpwd){
+					$.messager.alert("系统提示","两次新密码不一致","error");
+  					return;
+				}
+				$.messager.progress({title:"系统提示",msg:"数据保存中,请稍等..."});
+  				$.ajax({
+					url:"updatePwd_index.htm",
+					type:"post",
+					async:false,
+					data:{
+						oldpwd : oldpwd,
+						newpwd : newpwd,
+						vfpwd : vfpwd
+					},
+					success:function(r){
+						$.messager.progress('close');
+						r=$.parseJSON(r);
+						if(r.result=="500"){
+							alert(r.msg);
+						}else if(r.result=="502"){
+							$.messager.alert("系统提示","密码修改成功","success");
+						}
+					},
+					error:function(){
+						$.messager.progress('close');
+						$.messager.alert("系统提示","服务器连接失败","error");
+					}
+				});
+			}
+			
+			
+			
+			//右侧面板页面刷新
+			function createTab(node){
+				var domain_url = node.attributes != undefined?node.attributes:"not_develop.htm";
+				$.ajax({
+					url:"findOvidByMurl_operVideo.htm",
+					type:"post",
+					data:{
+						murl : domain_url
+					},
+					success:function(r){
+						$("#domain").panel('refresh',domain_url); 
+					},
+					error:function(){
+						$.messager.alert("系统提示","服务器连接失败","error");
+					}
+				});
+			}
+			
+			
+			
+			
+			
+			//右侧面板刷新
+			function refresh(href,text){
+				if(href == ""){
+					$.messager.alert("系统提示","暂无访问权限","warning");
+					return;
+				}
+
+                if(href=='show_ResultAnalysisNew_page.htm'){
+                    window.open('show_ResultAnalysisNew_page.htm');
+                    return;
+                }
+		 		$("#domain").panel('refresh',href); 
+		 	}
+		</script>
+  </body>
+</html>

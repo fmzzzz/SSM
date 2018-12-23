@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+		"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zh.campus.Dao.CampusInfoDao">
+	
+	<!-- 查询所有省数据 -->
+	<select id="findAllProvince_campus" resultType="map">
+		select pccode, pcname from province
+	</select>
+	
+	
+	
+	<!-- 根据省数据提取市数据 -->
+	<select id="findCityByPccode_campus" parameterType="java.lang.String" resultType="map">
+		select ctcode, ctname from city where pccode = #{pccode}
+	</select>
+	
+	
+	<!-- 根据市数据查询对应区县数据 -->
+	<select id="findAreaByCtcode_campus" parameterType="java.lang.String" resultType="map">
+		select aacode, aaname from area where ctcode = #{ctcode}
+	</select>
+	
+	
+	<sql id="campusColumn">csid, pccode, ctcode, aacode, csname, cscode, createyear, 
+	csotname, csproerty, csaddres, cstelnum, principal, prnum, charger, chagejob, 
+	chrgtelnum, email, postcode, csintro, addtime </sql>
+	
+	<!-- 添加学校信息 -->
+	<insert id="addCampusData">
+		insert into campus(
+			<include refid="campusColumn"/>
+		) values(
+			#{csid}, #{pccode}, #{ctcode}, #{aacode}, #{csname},
+			#{cscode}, #{createyear}, #{csotname}, #{csproerty}, #{csaddres},
+			#{cstelnum}, #{principal}, #{prnum}, #{charger}, #{chagejob},
+			#{chrgtelnum}, #{email}, #{postcode}, #{csintro}, #{addtime}
+		)
+	</insert>
+	
+	<!-- 根据条件搜索学校信息 -->
+	<select id="list_campusnew_exp" parameterType="map" resultType="map">
+		select cs.csname, pc.pcname, ct.ctname, aa.aaname, cs.cscode, cs.createyear, 
+				cs.csotname, cp.ctypename, cs.csaddres, cs.cstelnum, cs.principal, cs.prnum, cs.charger, cs.chagejob, 
+				cs.chrgtelnum, cs.email, cs.postcode, cs.csintro from campus cs, province pc,city ct, area aa , campustype cp
+			where cs.pccode = pc.pccode and cs.ctcode = ct.ctcode and cp.ctypenum = cs.csproerty 
+			and cs.aacode = aa.aacode
+				<if test="pccode != ''"> and pc.pccode = #{pccode} </if>
+				<if test="ctcode != ''"> and ct.ctcode = #{ctcode} </if>
+				<if test="aacode != ''"> and aa.aacode = #{aacode} </if>
+				<if test="csname != ''"> and cs.csname = #{csname} </if>
+	</select>
+	
+	
+	<!-- 查询是否存在省名称 -->
+	<select id="countPccodeByPcname" parameterType="java.lang.String" resultType="int">
+		select count(1) from province where pcname = #{pcname}
+	</select>
+	
+	
+	
+	<!-- 查询当前省数据下是否存在该市名称 -->
+	<select id="countCtcodeByPcname" parameterType="java.lang.String" resultType="int">
+		select count(1) from province pc, city ct where pc.pcname = #{pcname} and ct.ctname = #{ctname} and ct.pccode = pc.pccode
+	</select>
+	
+	
+	
+	<!-- 查询对应区县数据是否存在 -->
+	<select id="countAacodeByPcnameCtname" parameterType="java.lang.String" resultType="int">
+		select count(1) from province pc, city ct, area aa where 
+		aa.aaname = #{aaname} and aa.pccode = pc.pccode and 
+		aa.ctcode = ct.ctcode and pc.pcname =#{pcname} and ct.ctname=#{ctname}
+	</select>
+	
+	
+	
+	<!-- 检查学校是否存在 -->
+	<select id="checkCsnameIfExist" parameterType="java.lang.String" resultType="int">
+		select count(1) from campus where csname = #{csname}
+	</select>
+	
+	
+	<!-- 校验学校标识码是否存在 -->
+	<select id="checkCscodeIfExist" parameterType="java.lang.String" resultType="int">
+		select count(1) from campus where cscode =#{cscode}
+	</select>
+	
+	
+	
+	<!-- 查看学校是否存在对应类别 -->
+	<select id="checkIfExistCsproerty" parameterType="java.lang.String" resultType="int">
+		select count(1) from campustype where ctypename = #{csproerty}
+	</select>
+	
+	<!-- 根据省名称查询省编码 -->
+	<select id="findPccodeByPcname" parameterType="java.lang.String" resultType="java.lang.String">
+		select pccode from province where pcname = #{pcname}
+	</select>
+	
+	
+	<!-- 查询市编码 -->
+	<select id="findCtcodeByCtname" parameterType="java.lang.String" resultType="java.lang.String">
+		select ct.ctcode from city ct,province pc where pc.pccode = #{pccode} and ct.pccode = pc.pccode and ct.ctname = #{ctname}
+	</select>
+	
+	
+	
+	<!-- 查询县区编码 -->
+	<select id="findAAcodeByAaname" parameterType="java.lang.String" resultType="java.lang.String">
+		select aa.aacode from area aa, province pc , city ct where pc.pccode = #{pccode} and 
+		ct.ctcode = #{ctcode} and aa.aaname =#{aaname} and aa.pccode = pc.pccode and aa.ctcode = ct.ctcode
+	</select>
+	
+	
+	<!-- 查询学校类别 -->
+	<select id="findTypeByCsproerty" parameterType="java.lang.String" resultType="java.lang.String">
+		select ctypenum from campustype where ctypename = #{csproerty}
+	</select>
+</mapper>

@@ -1,0 +1,523 @@
+package zh.campus.Service.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import zh.beans.CampusBean;
+import zh.campus.Dao.CampusInfoDao;
+import zh.campus.Service.CampusInfoService;
+import zh.utils.ExcelUtils;
+import zh.utils.ReqUtils;
+import zh.utils.UtilDate;
+
+@Service
+public class CampusInfoServiceBean implements CampusInfoService{
+
+	@Resource
+	private CampusInfoDao campusDao;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(CampusInfoServiceBean.class);
+	
+	/**
+	 * @comment: 查询所有省数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午4:07:01
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findAllProvince_campus() {
+		List<Map<String,Object>> pList = new ArrayList<>();
+		try {
+			pList = campusDao.findAllProvince_campus();
+		} catch (Exception e) {
+			logger.error("CampusInfoServiceBean---调用findAllProvince_campus---campusDao---findAllProvince_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return pList;
+	}
+	
+	/**
+	 * @comment: 根据省数据查询所有市数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午9:50:22
+	 * @param pccode
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findCityByPccode_campus(String pccode) {
+		List<Map<String,Object>> ctListMap = new ArrayList<>();
+		try {
+			ctListMap = campusDao.findCityByPccode_campus(pccode);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用findCityByPccode_campus---campusDao---findCityByPccode_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return ctListMap;
+	}
+
+	/**
+	 * @comment: 根据市数据查询对应区县数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午10:04:08
+	 * @param ctcode
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findAreaByCtcode_campus(String ctcode) {
+		List<Map<String,Object>> listMap = new ArrayList<>();
+		try {
+			listMap = campusDao.findAreaByCtcode_campus(ctcode);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用findAreaByCtcode_campus---campusDao---findAreaByCtcode_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return listMap;
+	}
+
+	/**
+	 * @comment: 添加学校信息
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月27日下午1:37:50
+	 * @param campusBean
+	 * @return
+	 */
+	@Override
+	public String addCampusData(CampusBean campusBean) {
+		try {
+			campusDao.addCampusData(campusBean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用addCampusData---campusDao---addCampusData---系统异常");
+			return "{result:'500',msg:'系统异常，请联系管理员'}";
+		}
+		return "{result:'502',msg:'添加成功'}";
+	}
+
+	/**
+	 * @comment: 按照搜索条件查询学校数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月27日下午3:45:35
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> list_campusnew_exp(Map<String, Object> param) {
+		List<Map<String, Object>> ListMap = new ArrayList<>();
+		try {
+			ListMap = campusDao.list_campusnew_exp(param);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用list_campusnew_exp---campusDao---list_campusnew_exp---系统异常");
+			return new ArrayList<>();
+		}
+		return ListMap;
+	}
+
+	/**
+	 * @comment: 学校信息批量导入
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月29日下午2:42:24
+	 * @param fileUrl
+	 * @return
+	 */
+	@Override
+	public String importCampus(String fileUrl) {
+		// 判断文件是否存在
+		File file = new File(fileUrl);
+		if (!file.exists()) {
+			return "{result:500,msg:'读取的上传文件不存在'}";
+		}
+		// 判断是否读取到excel表头
+		String heads = ExcelUtils.gethead(fileUrl, 0);
+		if (StringUtils.isEmpty(heads)) {
+			return "{result:500,msg:'读取Excel文件 表头读取失败'}";
+		}
+		List<Map<String, Object>> lst_data = new ArrayList<Map<String, Object>>();
+		String[] columns_arr = heads.split(",");
+		try {
+			FileInputStream is = new FileInputStream(file);
+			HSSFWorkbook wbs = new HSSFWorkbook(is);
+			HSSFSheet childSheet = wbs.getSheetAt(0);
+			for (int j = 0; j <= childSheet.getLastRowNum(); j++) {
+				HSSFRow row = childSheet.getRow(j);
+				StringBuilder row_value = new StringBuilder();
+				if (null != row) {
+					Map<String, Object> data_row = new HashMap<String, Object>();
+					for (int k = 0; k < columns_arr.length; k++) {
+						Cell cell = row.getCell(k);
+						if (null != cell) {
+							cell.setCellType(Cell.CELL_TYPE_STRING);
+							data_row.put(columns_arr[k],ExcelUtils.getCellValue(cell));
+							row_value.append(ExcelUtils.getCellValue(cell));
+						} else {
+							if (!StringUtils.isEmpty(columns_arr[k])) {
+								data_row.put(columns_arr[k], "");
+							}
+						}
+					}
+					if (row_value.length() > 0) {
+						lst_data.add(data_row);
+						row_value.delete(0, row_value.length() - 1);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.info("CampusInfoServiceBean---调用importCampus---系统异常");
+			return "{result:500,msg:'系统异常'}";
+		}
+		/**
+		 * 判断表头
+		 */
+		Map<String,Object> testMap=new HashMap<String, Object>();
+		testMap=lst_data.get(0);
+		//所在省
+		if(testMap.get("'省'")==null||(testMap.get("'省'")!=null&&!testMap.get("'省'").toString().equals("省"))){
+			return "{msg:'【省】列不存在，请检查！',result:500}";
+		}
+		//所在市
+		if(testMap.get("'市'")==null||(testMap.get("'市'")!=null&&!testMap.get("'市'").toString().equals("市"))){
+			return "{msg:'【市】列不存在，请检查！',result:500}";
+		}	
+		//所在县区
+		if(testMap.get("'县区'")==null||(testMap.get("'县区'")!=null&&!testMap.get("'县区'").toString().equals("县区"))){
+			return "{msg:'【县区】列不存在，请检查！',result:500}";
+		}
+		
+		//创办年份
+		if(testMap.get("'创办年份'")==null||(testMap.get("'创办年份'")!=null&&!testMap.get("'创办年份'").toString().equals("创办年份"))){
+			return "{msg:'【创办年份】列不存在，请检查！',result:500}";
+		}
+		//学校名称
+		if(testMap.get("'学校名称'")==null||(testMap.get("'学校名称'")!=null&&!testMap.get("'学校名称'").toString().equals("学校名称"))){
+			return "{msg:'【学校名称】列不存在，请检查！',result:500}";
+		}
+		//学校别名
+		if(testMap.get("'学校别名'")==null||(testMap.get("'学校别名'")!=null&&!testMap.get("'学校别名'").toString().equals("学校别名"))){
+			return "{msg:'【学校别名】列不存在，请检查！',result:500}";
+		}
+		//学校标识码
+		if(testMap.get("'学校标识码'")==null||(testMap.get("'学校标识码'")!=null&&!testMap.get("'学校标识码'").toString().equals("学校标识码"))){
+			return "{msg:'【学校标识码】列不存在，请检查！',result:500}";
+		}
+		//学校类别
+		if(testMap.get("'学校类别'")==null||(testMap.get("'学校类别'")!=null&&!testMap.get("'学校类别'").toString().equals("学校类别"))){
+			return "{msg:'【学校类别】列不存在，请检查！',result:500}";
+		}
+		//学校电话
+		if(testMap.get("'学校电话'")==null||(testMap.get("'学校电话'")!=null&&!testMap.get("'学校电话'").toString().equals("学校电话"))){
+			return "{msg:'【学校电话】列不存在，请检查！',result:500}";
+		}
+		//校长姓名
+		if(testMap.get("'校长姓名'")==null||(testMap.get("'校长姓名'")!=null&&!testMap.get("'校长姓名'").toString().equals("校长姓名"))){
+			return "{msg:'【校长姓名】列不存在，请检查！',result:500}";
+		}
+		//校长联系电话
+		if(testMap.get("'校长联系电话'")==null||(testMap.get("'校长联系电话'")!=null&&!testMap.get("'校长联系电话'").toString().equals("校长联系电话"))){
+			return "{msg:'【校长联系电话】列不存在，请检查！',result:500}";
+		}		
+		//分管领导姓名
+		if(testMap.get("'分管领导姓名'")==null||(testMap.get("'分管领导姓名'")!=null&&!testMap.get("'分管领导姓名'").toString().equals("分管领导姓名"))){
+			return "{msg:'【分管领导姓名】列不存在，请检查！',result:500}";
+		}
+		//分管领导职务
+		if(testMap.get("'分管领导职务'")==null||(testMap.get("'分管领导职务'")!=null&&!testMap.get("'分管领导职务'").toString().equals("分管领导职务"))){
+			return "{msg:'【分管领导职务】列不存在，请检查！',result:500}";
+		}
+		//分管领导电话
+		if(testMap.get("'分管领导电话'")==null||(testMap.get("'分管领导电话'")!=null&&!testMap.get("'分管领导电话'").toString().equals("分管领导电话"))){
+			return "{msg:'【分管领导电话】列不存在，请检查！',result:500}";
+		}
+		//学校地址
+		if(testMap.get("'学校地址'")==null||(testMap.get("'学校地址'")!=null&&!testMap.get("'学校地址'").toString().equals("学校地址"))){
+			return "{msg:'【学校地址】列不存在，请检查！',result:500}";
+		}
+		//电子邮箱
+		if(testMap.get("'电子邮箱'")==null||(testMap.get("'电子邮箱'")!=null&&!testMap.get("'电子邮箱'").toString().equals("电子邮箱"))){
+			return "{msg:'【电子邮箱】列不存在，请检查！',result:500}";
+		}
+		//邮政编码
+		if(testMap.get("'邮政编码'")==null||(testMap.get("'邮政编码'")!=null&&!testMap.get("'邮政编码'").toString().equals("邮政编码"))){
+			return "{msg:'【邮政编码】列不存在，请检查！',result:500}";
+		}
+		//学校简介
+		if(testMap.get("'学校简介'")==null||(testMap.get("'学校简介'")!=null&&!testMap.get("'学校简介'").toString().equals("学校简介"))){
+			return "{msg:'【学校简介】列不存在，请检查！',result:500}";
+		}
+		
+		//将excel的表头移除，只保留数据
+		List<Map<String,Object>> listMap = new ArrayList<Map<String,Object>>();
+		lst_data.remove(0);
+		listMap=lst_data;
+		
+		//验证excel表是否为空
+		if(listMap.size()<=0){
+			return "{msg:'Excel中无任何数据，无法导入。',result:500}";
+		}
+		
+		//定义行数
+		Integer getin=0;
+		/**
+		 * 循环excel数据对其进行校验
+		 */
+		for (Map<String, Object> getexcelMap : listMap) {
+			//追加行数
+			getin++;
+			
+			/**
+			 * 地区校验
+			 */
+			//省
+			Object pcname = getexcelMap.get("'省'");
+			// 市
+			Object ctname = getexcelMap.get("'市'");
+			// 县区
+			Object aaname = getexcelMap.get("'县区'");
+			if(StringUtils.isEmpty(pcname)){
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【省】为必填,请检查'}";
+			}else {
+				// 查询是否存在该名称的省
+				int count = Integer.MIN_VALUE;
+				try {
+					count = campusDao.countPccodeByPcname(pcname.toString());
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error("CampusInfoServiceBean---调用importCampus---campusDao---countPccodeByPcname---系统异常");
+					return "{result:500,msg:'系统异常'}";
+				}
+				if(count<=0) {
+					return "{result:500,msg:'Excel第【"+getin+"】行【省】：【"+pcname.toString()+"】在平台中不存在，请检查，数据格式为完整省名称，例如：安徽省'}";
+				}else {
+					if(StringUtils.isEmpty(ctname)) {
+						return "{result:500,msg:'Excel第【"+getin+"】行,列【市】为必填,请检查'}";
+					}else {
+						int ctcount = Integer.MIN_VALUE;
+						try {
+							ctcount = campusDao.countCtcodeByPcname(pcname.toString(),ctname.toString());
+						} catch (Exception e) {
+							e.printStackTrace();
+							logger.error("CampusInfoServiceBean---调用importCampus---campusDao---countCtcodeByPcname---系统异常");
+							return "{result:500,msg:'系统异常'}";
+						}
+						if(ctcount<=0) {
+							return "{result:500,msg:'Excel第【"+getin+"】行【市】：【"+ctname.toString()+"】在平台中不存在，请检查'}";
+						}else {
+							if(StringUtils.isEmpty(aaname)) {
+								return "{result:500,msg:'Excel第【"+getin+"】行,列【县区】为必填,请检查'}";
+							}else {
+								int aacount = Integer.MIN_VALUE;
+								try {
+									aacount = campusDao.countAacodeByPcnameCtname(pcname.toString(),ctname.toString(),aaname.toString());
+								} catch (Exception e) {
+									e.printStackTrace();
+									logger.error("CampusInfoServiceBean---调用importCampus---campusDao---countAacodeByPcnameCtname---系统异常");
+									return "{result:500,msg:'系统异常'}";
+								}
+								if(aacount<=0) {
+									return "{result:500,msg:'Excel第【"+getin+"】行【县区】：【"+ctname.toString()+"】在平台中不存在，请检查'}";
+								}
+							}
+							
+						}
+					}
+					
+				}
+			}
+			
+			/**
+			 * 校验学校名称
+			 */
+			Object csname = getexcelMap.get("'学校名称'");
+			if(StringUtils.isEmpty(csname)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校名称】为必填,请检查'}";
+			}
+			int cscount = Integer.MIN_VALUE;
+			try {
+				cscount = campusDao.checkCsnameIfExist(csname.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---checkCsnameIfExist---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+			if(cscount>0) {
+				return "{result:500,msg:'Excel第【"+getin+"】行，在该地区下的学校名称：【"+csname.toString()+"】已经存在，请检查'}";
+			}
+			
+			
+			/**
+			 * 校验学校标识码
+			 */
+			Object cscode = getexcelMap.get("'学校标识码'");
+			if(StringUtils.isEmpty(cscode)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校标识码】为必填,请检查'}";
+			}
+			int cscodeCount = Integer.MIN_VALUE;
+			try {
+				cscodeCount = campusDao.checkCscodeIfExist(cscode.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---checkCscodeIfExist---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+			if(cscodeCount>0) {
+				return "{result:500,msg:'Excel第【"+getin+"】行，在该地区下的学校标识码：【"+cscode.toString()+"】已经存在，请检查'}";
+			}
+			
+			/**
+			 * 校验创建时间
+			 */
+			Object createyear = getexcelMap.get("'创办年份'");
+			if(StringUtils.isEmpty(createyear)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【创办年份】为必填,请检查'}";
+			}
+			
+			/**
+			 * 校验学校别名
+			 */
+			Object csotname = getexcelMap.get("'学校别名'");
+			if(StringUtils.isEmpty(csotname)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校别名】为必填,请检查'}";
+			}
+			
+			/**
+			 * csproerty 学校性质
+			 */
+			Object csproerty= getexcelMap.get("'学校类别'");
+			if(StringUtils.isEmpty(csproerty)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校类别】为必填,请检查'}";
+			}else {
+				int count = Integer.MIN_VALUE;
+				try {
+					count = campusDao.checkIfExistCsproerty(csproerty.toString());
+				} catch (Exception e) {
+					e.printStackTrace();
+					logger.error("CampusInfoServiceBean---调用importCampus---campusDao---checkIfExistCsproerty---系统异常");
+					return "{result:500,msg:'系统异常'}";
+				}
+				if(count<=0) {
+					return "{result:500,msg:'Excel第【"+getin+"】行，在该地区下的学校类别：【"+cscode.toString()+"】不存在，请检查'}";
+				}
+			}
+			/**
+			 * 校验学校地址
+			 */
+			Object csaddres = getexcelMap.get("'学校地址'");
+			if(StringUtils.isEmpty(csaddres)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校地址】为必填,请检查'}";
+			}
+			/**
+			 * 校验学校电话
+			 */
+			Object cstelnum = getexcelMap.get("'学校电话'");
+			if(StringUtils.isEmpty(cstelnum)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【学校电话】为必填,请检查'}";
+			}
+			/**
+			 * 校验校长姓名
+			 */
+			Object principal = getexcelMap.get("'校长姓名'");
+			if(StringUtils.isEmpty(principal)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【校长姓名】为必填,请检查'}";
+			}
+			/**
+			 * 校验校长联系方式
+			 */
+			Object prnum = getexcelMap.get("'校长联系电话'");
+			if(StringUtils.isEmpty(prnum)) {
+				return "{result:500,msg:'Excel第【"+getin+"】行,列【校长联系电话】为必填,请检查'}";
+			}
+			/**
+			 * 校验完成之后存储数据
+			 */
+			/*
+			 * 查询省市县的编码
+			 */
+			String pccode = "";
+			try {
+				pccode = campusDao.findPccodeByPcname(pcname.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---findPccodeByPcname---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}			
+			String ctcode ="";
+			try {
+				ctcode = campusDao.findCtcodeByCtname(pccode,ctname.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---findPccodeByPcname---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+			String aacode = "";
+			try {
+				aacode = campusDao.findAAcodeByAaname(pccode, ctcode, aaname.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---findPccodeByPcname---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+			// 查询学校类别
+			String type = "";
+			try {
+				type = campusDao.findTypeByCsproerty(csproerty.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---findTypeByCsproerty---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+			/**
+			 * 参数封装
+			 */
+			CampusBean campusBean = new CampusBean();
+			campusBean.setPccode(pccode);
+			campusBean.setCtcode(ctcode);
+			campusBean.setAacode(aacode);
+			campusBean.setCsid(ReqUtils.uuid());
+			campusBean.setCsname(csname.toString());
+			campusBean.setCscode(cscode.toString());
+			campusBean.setCreateyear(createyear.toString());
+			campusBean.setCsotname(csotname.toString());
+			campusBean.setCsproerty(Integer.parseInt(type));
+			campusBean.setCsaddres(csaddres.toString());
+			campusBean.setCstelnum(cstelnum.toString());
+			campusBean.setPrincipal(principal.toString());
+			campusBean.setPrnum(prnum.toString());
+			campusBean.setCharger(getexcelMap.get("'分管领导姓名'").toString());
+			campusBean.setChagejob(getexcelMap.get("'分管领导职务'").toString());
+			campusBean.setChrgtelnum(getexcelMap.get("'分管领导电话'").toString());
+			campusBean.setEmail(getexcelMap.get("'电子邮箱'").toString());
+			campusBean.setPostcode(getexcelMap.get("'邮政编码'").toString());
+			campusBean.setCsintro(getexcelMap.get("'学校简介'").toString());
+			campusBean.setAddtime(UtilDate.getYMdHms());
+			
+			try {
+				campusDao.addCampusData(campusBean);
+			} catch (Exception e) {
+				e.printStackTrace();
+				logger.error("CampusInfoServiceBean---调用importCampus---campusDao---findTypeByCsproerty---系统异常");
+				return "{result:500,msg:'系统异常'}";
+			}
+		}
+		return "{result:'502',msg:'导入成功'}";
+	}
+
+}

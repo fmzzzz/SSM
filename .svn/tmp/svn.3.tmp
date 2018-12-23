@@ -1,0 +1,62 @@
+package zh.login.Dao;
+
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import zh.beans.SysUsersBean;
+
+/**
+ * @comment:用户登录数据库连接层
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:39
+ */
+@Repository
+public interface LoginDao {
+
+	/**
+	 * @comment: 查询是否存在该用户
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月20日上午11:05:21
+	 */
+	int countNumByUsname(String usname);
+
+	
+	
+	
+	
+	
+	/**
+	 * @comment: 根据用户名查询对应密码
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月20日上午11:13:04
+	 */
+	String findPwdInDbByUsername(String usname);
+
+
+
+
+
+	/**
+	 * @comment: 查询usid
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月20日下午4:17:33
+	 */
+	String findUsidByUsnamePwd(SysUsersBean usersBean);
+
+
+
+
+
+	/**
+	 * @comment: 跳转到主界面的时候附带查询系统的基础信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月21日下午8:21:18
+	 */
+	Map<String, Object> findSysData();
+	
+}

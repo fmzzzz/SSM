@@ -1,0 +1,18 @@
+package zh.login.Service;
+
+/**
+ * @comment:用户登录逻辑层接口
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:01
+ */
+public interface LoginService {
+
+	/**
+	 * @comment:用户登陆逻辑
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月20日上午10:57:07
+	 */
+	String login(String username, String pwd);
+
+}

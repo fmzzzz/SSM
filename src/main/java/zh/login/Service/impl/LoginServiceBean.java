@@ -1,0 +1,249 @@
+package zh.login.Service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import zh.beans.SysUsersBean;
+import zh.login.Controller.LoginController;
+import zh.login.Dao.LoginDao;
+import zh.login.Service.LoginService;
+import zh.utils.MD5Utils;
+
+/**
+ * @comment:用户登录逻辑层接口实现类
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:20
+ */
+@Service
+public class LoginServiceBean implements LoginService{
+
+	@Resource
+	private LoginDao loginDao;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(LoginController.class);
+
+	/**
+	 * @comment: 用户登陆逻辑
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月20日上午10:57:40
+	 * @param username
+	 * @param pwd
+	 * @return
+	 */
+	@Override
+	public String login(String username, String pwd, HttpServletRequest req) {
+		/**
+		 * 校验参数
+		 */
+		if(StringUtils.isEmpty(username)) {
+			return "{result:'500',msg:'请填写用户名'}";
+		}
+		
+		if(StringUtils.isEmpty(pwd)) {
+			return "{result:'500',msg:'请填写密码'}";
+		}
+		
+		/**
+		 * 查询是否存在该用户
+		 */
+		int count =Integer.MIN_VALUE;
+		try {
+			count = loginDao.countNumByUsname(username.trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用login---loginDao---countNumByUsname---系统异常");
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		if(count<=0) { 
+			return "{result:'500',msg:'用户名或密码错误，请检查'}";
+		}
+		
+		/**
+		 * 查询对应的密码
+		 */
+		String pwdDb = "";
+		try {
+			pwdDb = loginDao.findPwdInDbByUsername(username.trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用login---loginDao---findPwdInDbByUsername---系统异常");
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		
+		if(!MD5Utils.toMd5(pwd.trim()).equals(pwdDb)){
+			return "{result:'500',msg:'用户名或密码错误，请检查'}";
+		}
+		
+		
+		/**
+		 * 登陆成功之后将部分数据作为会话追踪的标识
+		 */
+		String usid ="";
+		try {
+			// 实例化userBean
+			SysUsersBean usersBean = new SysUsersBean();
+			usersBean.setUsname(username.trim());
+			usersBean.setPassword(pwdDb);
+			/**
+			 * 执行查询方法
+			 */
+			usid = loginDao.findUsidByUsnamePwd(usersBean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 login---loginDao---findUsidByUsnamePwd---系统异常");
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		
+		if(StringUtils.isEmpty(usid)) {
+			return "{result:'500',msg:'登录程序调用内部错误，请联系管理员'}";
+		}
+		
+		/**
+		 * 存session
+		 * false:如果session为空，则不进行创建
+		 * true：如果session为空，则会自动创建一个
+		 */
+		HttpSession session = req.getSession();
+		session.setAttribute("USID", usid);
+		return "{result:'502',msg:'登陆成功'}";
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * @comment: 跳转到主界面的时候附带查询系统的基础信息
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月21日下午8:19:08
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> findSysData() {
+		// 定义返回值
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		try {
+			resultMap = loginDao.findSysData();
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 findSysData---loginDao---findSysData---系统异常");
+			return new HashMap<String,Object>();
+		}
+		return resultMap;
+	}
+
+
+
+
+
+
+	/**
+	 * @comment: 查询系统的一级菜单
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月23日上午12:03:19
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findSysMenuList() {
+		List<Map<String,Object>> listMap = new ArrayList<>();
+		try {
+			listMap = loginDao.findSysMenuList();
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 findSysMenuList---loginDao---findSysMenuList---系统异常");
+			return new ArrayList<>();
+		}
+		return listMap;
+	}
+
+
+
+
+
+
+	/**
+	 * @comment: 修改密码
+	 * @author: 凡宇
+	 * @date: 2018年11月23日上午9:30:31
+	 * @param oldPwd
+	 * @param newpwd
+	 * @param vfpwd
+	 * @param usid
+	 * @return
+	 */
+	@Override
+	public String sysUserUpdatePwd(String oldPwd, String newpwd, String vfpwd, String usid) {
+		if(!newpwd.equals(vfpwd)){
+			return "{result:'500',msg:'两次输入的新密码不一致，请检查'}";
+		}
+		
+		/**
+		 * 查询旧密码是否一致
+		 */
+		int count = Integer.MIN_VALUE;
+		try {
+			count = loginDao.countSysDb(usid,MD5Utils.toMd5(oldPwd));
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 sysUserUpdatePwd---loginDao---countSysDb---系统异常");
+			return "{result:'500',msg:'系统异常，请刷新重试'}";
+		}
+		if(count<=0){
+			return "{result:'500',msg:'原密码输入错误，请检查'}";
+		}
+		
+		/**
+		 * 更新密码
+		 */
+		try {
+			loginDao.updateUserPwd(usid,MD5Utils.toMd5(newpwd));
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 sysUserUpdatePwd---loginDao---updateUserPwd---系统异常");
+			return "{result:'500',msg:'系统异常，请刷新重试'}";
+		}
+		return "{result:'502',msg:'OK'}";
+	}
+
+
+
+
+
+
+	/**
+	 * @comment: 查询系统的子菜单
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日上午10:40:31
+	 * @param mid
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findSonMenuList(String mid) {
+		List<Map<String,Object>> listMap = new ArrayList<>();
+		try {
+			listMap = loginDao.findSonMenuList(mid);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginServiceBean---调用 findSonMenuList---loginDao---findSonMenuList---系统异常");
+			return new ArrayList<>();
+		}
+		return listMap;
+	}
+
+}

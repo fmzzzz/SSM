@@ -1,0 +1,26 @@
+$.sidebarMenu = function(menu) {
+  var animationSpeed = 300;
+  
+  $(menu).on('click', 'li a', function(e) {
+    var $this = $(this);
+    var checkElement = $this.next();
+
+    if (checkElement.is('.treeview-menu') && checkElement.is(':visible')) {
+      checkElement.slideUp(animationSpeed, function() {
+        checkElement.removeClass('menu-open');
+      });
+    }
+
+    else if ((checkElement.is('.treeview-menu')) && (!checkElement.is(':visible'))) {
+      var parent = $this.parents('ul').first();
+      var ul = parent.find('ul:visible').slideUp(animationSpeed);
+      ul.removeClass('menu-open');
+      checkElement.slideDown(animationSpeed, function() {
+        checkElement.addClass('menu-open');
+      });
+    }
+    if (checkElement.is('.treeview-menu')) {
+      e.preventDefault();
+    }
+  });
+}

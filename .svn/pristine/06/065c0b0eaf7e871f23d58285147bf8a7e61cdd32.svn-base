@@ -1,0 +1,80 @@
+package zh.campus.Service;
+
+import java.util.List;
+import java.util.Map;
+
+import zh.beans.CampusBean;
+
+public interface CampusInfoListPageService {
+
+	
+	/**
+	 * @comment: 学校信息按照条件分页查询
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月27日下午6:40:26
+	 */
+	List<Map<String, Object>> findCampusListPage(String pccode, String ctcode, String aacode, String csname, int rownum,
+			int rows);
+
+	
+	
+	
+	
+	/**
+	 * @comment: 查询满足条件的数据数量
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月27日下午6:41:36
+	 */
+	int countCampusListPage(String pccode, String ctcode, String aacode, String csname);
+
+
+
+
+	/**
+	 * @comment: 根据csid删除单条学校信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日上午11:48:34
+	 */
+	String deleteCampusByCsid(String csid);
+
+
+
+
+
+	/**
+	 * @comment: 查询单个学校的详细信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日下午4:16:37
+	 */
+	Map<String, Object> findCampusByCsid_campus(String csid);
+
+
+
+
+	/**
+	 * @comment:学校信息编辑保存
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日下午5:54:05
+	 */
+	String editCampus_campus(CampusBean campusBean);
+
+
+
+
+	/**
+	 * @comment: 学校信息批量删除
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月29日上午11:28:17
+	 */
+	String delBaths_campus(String csids);
+	
+	
+	
+
+}

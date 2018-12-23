@@ -1,0 +1,71 @@
+package zh.campus.Dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import zh.beans.CampusBean;
+
+@Repository
+public interface CampusInfoDao {
+
+	/**
+	 * @comment: 查询所有省数据
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月26日下午4:07:31
+	 */
+	List<Map<String, Object>> findAllProvince_campus();
+
+	
+	
+	
+	
+	
+	/**
+	 * @comment: 根据省数据查询对应的市区数据
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月26日下午9:52:20
+	 */
+	List<Map<String, Object>> findCityByPccode_campus(String pccode);
+
+
+
+
+
+
+	/**
+	 * @comment: 根据市数据查询对应县区数据
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月26日下午10:05:41
+	 */
+	List<Map<String, Object>> findAreaByCtcode_campus(String ctcode);
+
+
+
+
+
+	/**
+	 * @comment:添加学校信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月27日下午1:42:08
+	 */
+	void addCampusData(CampusBean campusBean);
+
+
+
+
+
+	/**
+	 * @comment: 按照条件搜索导出学校信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月27日下午3:47:49
+	 */
+	List<Map<String, Object>> list_campusnew_exp(Map<String, Object> param);
+
+}

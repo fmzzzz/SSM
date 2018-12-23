@@ -1,0 +1,66 @@
+package zh.login.Controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import zh.login.Service.LoginService;
+import zh.utils.ReqUtils;
+
+/**
+ * @comment:用户登录控制层-----主要控制用户的登陆流程
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:39:36
+ */
+@Controller
+public class LoginController {
+	
+	/*
+	 * 用户登录业务逻辑层接口
+	 */
+	@Resource
+	private LoginService loginService;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(LoginController.class);
+	
+	
+	@RequestMapping("/userLogin")
+	public void userLogin(HttpServletRequest req, HttpServletResponse res) {
+		/*
+		 * 从页面获取参数
+		 */
+		String username = req.getParameter("username");
+		String pwd = req.getParameter("password");
+		/*
+		 * 定义返回值
+		 */
+		String result = "";
+		/**
+		 * 登陆逻辑
+		 */
+		try {
+			result = loginService.login(username,pwd);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("LoginController---调用userLogin---loginService---login---系统异常");
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		ReqUtils.backing_out_jsonArray(result, res);
+		return;
+	}
+	
+	
+	
+	
+	
+
+}

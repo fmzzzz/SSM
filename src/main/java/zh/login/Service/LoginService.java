@@ -1,0 +1,55 @@
+package zh.login.Service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * @comment:用户登录逻辑层接口
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:01
+ */
+public interface LoginService {
+
+	/**
+	 * @comment:用户登陆逻辑
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月20日上午10:57:07
+	 */
+	String login(String username, String pwd, HttpServletRequest req);
+	
+	/**
+	 * @comment: 跳转到主界面的时候附带查询系统的基础信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月21日下午8:18:38
+	 */
+	Map<String, Object> findSysData();
+
+	/**
+	 * @comment:查询系统的一级菜单
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月23日上午12:02:49
+	 */
+	List<Map<String, Object>> findSysMenuList();
+
+	/**
+	 * @comment: 修改密码
+	 * @param: 
+	 * @author: 凡宇
+	 * @date 2018年11月23日上午9:29:21
+	 */
+	String sysUserUpdatePwd(String oldPwd, String newpwd, String vfpwd, String usid);
+
+	/**
+	 * @comment: 查询系统的子菜单
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月26日上午10:39:57
+	 */
+	List<Map<String, Object>> findSonMenuList(String mid);
+
+}

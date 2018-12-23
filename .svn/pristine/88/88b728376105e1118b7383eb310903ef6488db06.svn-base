@@ -1,0 +1,151 @@
+package zh.campus.Service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+import zh.beans.CampusBean;
+import zh.campus.Dao.CampusInfoDao;
+import zh.campus.Service.CampusInfoService;
+
+@Service
+public class CampusInfoServiceBean implements CampusInfoService{
+
+	
+
+	@Resource
+	private CampusInfoDao campusDao;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(CampusInfoServiceBean.class);
+	
+	
+	
+	
+	/**
+	 * @comment: 查询所有省数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午4:07:01
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findAllProvince_campus() {
+		List<Map<String,Object>> pList = new ArrayList<>();
+		try {
+			pList = campusDao.findAllProvince_campus();
+		} catch (Exception e) {
+			logger.error("CampusInfoServiceBean---调用findAllProvince_campus---campusDao---findAllProvince_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return pList;
+	}
+
+
+
+
+	
+	
+	
+	/**
+	 * @comment: 根据省数据查询所有市数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午9:50:22
+	 * @param pccode
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findCityByPccode_campus(String pccode) {
+		List<Map<String,Object>> ctListMap = new ArrayList<>();
+		try {
+			ctListMap = campusDao.findCityByPccode_campus(pccode);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用findCityByPccode_campus---campusDao---findCityByPccode_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return ctListMap;
+	}
+
+
+
+
+
+
+
+	/**
+	 * @comment: 根据市数据查询对应区县数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月26日下午10:04:08
+	 * @param ctcode
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> findAreaByCtcode_campus(String ctcode) {
+		List<Map<String,Object>> listMap = new ArrayList<>();
+		try {
+			listMap = campusDao.findAreaByCtcode_campus(ctcode);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用findAreaByCtcode_campus---campusDao---findAreaByCtcode_campus---系统异常");
+			return new ArrayList<>();
+		}
+		return listMap;
+	}
+
+
+
+
+
+
+	/**
+	 * @comment: 添加学校信息
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月27日下午1:37:50
+	 * @param campusBean
+	 * @return
+	 */
+	@Override
+	public String addCampusData(CampusBean campusBean) {
+		try {
+			campusDao.addCampusData(campusBean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用addCampusData---campusDao---addCampusData---系统异常");
+			return "{result:'500',msg:'系统异常，请联系管理员'}";
+		}
+		return "{result:'502',msg:'添加成功'}";
+	}
+
+
+
+
+
+
+	/**
+	 * @comment: 按照搜索条件查询学校数据
+	 * @author: 傅里叶级数
+	 * @date: 2018年11月27日下午3:45:35
+	 * @return
+	 */
+	@Override
+	public List<Map<String, Object>> list_campusnew_exp(Map<String, Object> param) {
+		List<Map<String, Object>> ListMap = new ArrayList<>();
+		try {
+			ListMap = campusDao.list_campusnew_exp(param);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoServiceBean---调用list_campusnew_exp---campusDao---list_campusnew_exp---系统异常");
+			return new ArrayList<>();
+		}
+		return ListMap;
+	}
+
+}

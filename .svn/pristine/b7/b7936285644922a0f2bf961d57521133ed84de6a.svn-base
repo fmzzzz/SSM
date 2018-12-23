@@ -1,0 +1,156 @@
+		#shade {
+			background-color:#666;
+			position:fixed;
+			z-index:9999;
+			left:0;
+			top:0;
+			display:none;
+			width:100%;
+			height:100%;
+			opacity:0.5;
+			filter: alpha(opacity=50);
+			-moz-opacity: 0.5;
+		}
+		
+		/* 登录框  */
+		a {
+			text-decoration: none;
+		}
+		#tz_rightdiv_all {
+			position:fixed;
+			width:402px;
+			height:402px;
+			display:none;
+		 	z-index:9999;
+		 	top: 50%;
+            left: 50%;
+          	margin-left:-201px;
+          	margin-top:-201px;
+          	background-color:#fff;
+          	border-radius:10px;
+          	boder:solid 1px #ddd;
+		}
+		 #tz_rightdiv {
+		  	width:366px;
+            height:402px;
+		 	position:absolute;
+			margin: 0 auto;
+			margin-left:25px;
+			margin-top:25px;
+		}
+		
+		.k_sjdiv {
+			margin-left: auto;
+			margin-right: auto;
+			height: 90%;
+			width: 96%;
+		}
+		
+		.menu_mkdiv {
+			height: 30px;
+			margin-top:6%;
+			border-bottom: 2px solid #3fb2ff;
+		}
+		
+		.menu_mkdiv ul {
+			padding-left: 0px;
+			margin-top: 0px;
+			list-style: none;
+		}
+		
+		.menu_mkdiv ul li {
+			height: 30px;
+			line-height: 30px;
+			width: 22%;
+			margin-left: 2%;
+			float: left;
+		}
+		
+		.menu_mkdiv ul li a {
+			display: block;
+			height: 100%;
+			width: 100%;
+			text-align: center;
+			text-decoration: none;
+			color: #3fb2ff;
+		}
+		
+		.menu_mkdiv ul li a:hover {
+			background: #3FB2FF;
+			color: #fff;
+			border-radius: 5px 5px 0 0;
+		}
+		
+		.ipt_div {
+			height: 35px;
+			line-height: 35px;
+			width: 90%;
+			margin: 0 auto;
+			border: 1px solid #666;
+		}
+		
+		.yzm_div {
+			height: 35px;
+			line-height: 35px;
+			width: 90%;
+			margin: 0 auto;
+		}
+		
+		.jwb_div {
+			line-height: 35px;
+			width: 90%;
+			margin: 0 auto;
+		}
+		
+		.link_xx {
+			float: left;
+			font-size: 14px;
+			text-indent: 0.2em;
+			text-decoration: none;
+			color: #4ea9f9
+		}
+		
+		.link_xx:hover {
+			text-decoration: underline;
+			color: #0e67b6;
+		}
+		
+		.lz_div {
+			height: 35px;
+			line-height: 35px;
+			width: 90%;
+			margin: 0 auto;
+		}
+		
+		.btn_div {
+			height: 35px;
+			width: 42%;
+			background: #fff;
+			text-align: center;
+			border: none;
+			background: #4ea9f9;
+			border-radius: 3px;
+			color: #fff;
+			letter-spacing: 5px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		
+		.btn_div:hover {
+			background: #4181fe;
+		}
+		.k_tdiv {
+			height: 315px;
+			border: 1.5px solid #3aa9d1;
+			border-radius: 0 5px 5px 5px;
+		}
+		
+	 	.text_tdiv {
+	 		width:367px;
+			height: 35px;
+			line-height: 35px;
+			width: 100%;
+			background: url("../images/css_img/ht_bj.png") no-repeat;
+			background-size: 100% 100%;
+		}
+		

@@ -1,0 +1,12 @@
+package zh.login.Service.impl;
+
+import zh.login.Service.LoginService;
+
+/**
+ * @comment:用户登录逻辑层接口实现类
+ * @author 傅里叶级数
+ * @date 2018年11月20日上午9:43:20
+ */
+public class LoginServiceBean implements LoginService{
+
+}

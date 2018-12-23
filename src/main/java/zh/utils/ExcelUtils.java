@@ -1,0 +1,399 @@
+package zh.utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.springframework.util.StringUtils;
+
+import net.sf.jxls.transformer.XLSTransformer;
+
+/**
+ * @comment:Excel操作工具类
+ * @author 傅里叶级数
+ * @date 2018年5月27日上午11:15:32
+ */
+@SuppressWarnings({ "unchecked", "deprecation", "serial" })
+public class ExcelUtils implements Serializable {
+	
+	private static Logger logger = LogManager.getLogger(ExcelUtils.class);
+
+	public static String getCellValue(Cell cell) { 
+		switch (cell.getCellType()) {
+			case HSSFCell.CELL_TYPE_NUMERIC:
+				java.text.DecimalFormat  df=new   java.text.DecimalFormat("#.####");   
+				//BigDecimal db = new BigDecimal(cell.getNumericCellValue()).setScale(4,BigDecimal.ROUND_HALF_DOWN); 
+				return df.format(cell.getNumericCellValue());
+			case HSSFCell.CELL_TYPE_STRING:
+				return String.valueOf(cell.getStringCellValue()).replaceAll("\\s", "");
+			case HSSFCell.CELL_TYPE_BOOLEAN:
+				return String.valueOf(cell.getBooleanCellValue()).replaceAll("\\s", "");
+			case HSSFCell.CELL_TYPE_FORMULA:
+				return String.valueOf(cell.getCellFormula()).replaceAll("\\s", "");
+			default:
+				logger.info("unsuported sell type");
+				break;
+		}
+		return "";
+	}
+	
+	
+	/**
+	 * 读取指定文件指定行 以逗号分隔
+	 * @param file_uri
+	 * @param i
+	 * @return
+	 */
+	public static String gethead(String file_uri,int i) {
+		String row_head = "";
+		File f = new File(file_uri);
+		try {
+			FileInputStream is = new FileInputStream(f);
+			HSSFWorkbook wbs = new HSSFWorkbook(is);
+			HSSFSheet childSheet = wbs.getSheetAt(0);
+			// System.out.println(childSheet.getPhysicalNumberOfRows());
+			// System.out.println("有行数" + childSheet.getLastRowNum()); 
+			HSSFRow row = childSheet.getRow(i);
+			// System.out.println(row.getPhysicalNumberOfCells());
+			// System.out.println("有列数" + row.getLastCellNum());
+			if (null != row) {
+				for (int k = 0; k < row.getLastCellNum(); k++) {
+					HSSFCell cell = row.getCell(k);
+					if (null != cell) {
+						if(k>0)
+							row_head += ",";  
+						row_head += "'"+ExcelUtils.getCellValue(cell)+"'"; 
+					} else {
+						System.out.print("单元格不存在[行号"+i+" 列"+k+"]");
+					}
+				}
+			}
+			// System.out.println(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			return row_head;
+		} 
+	}
+	
+	/**
+	 * 读取指定文件指定行 以逗号分隔
+	 * @param file_uri
+	 * @param i
+	 * @return
+	 */
+	public static String getdata(String file_uri,int start_index) {
+		String row_head = "";
+		File f = new File(file_uri);
+		try {
+			FileInputStream is = new FileInputStream(f);
+			HSSFWorkbook wbs = new HSSFWorkbook(is);
+			HSSFSheet childSheet = wbs.getSheetAt(0);
+			// System.out.println(childSheet.getPhysicalNumberOfRows());
+			// System.out.println("有行数" + childSheet.getLastRowNum());
+			for (int j = start_index; j < childSheet.getLastRowNum(); j++) {
+				HSSFRow row = childSheet.getRow(j);
+				// System.out.println(row.getPhysicalNumberOfCells());
+				// System.out.println("有列数" + row.getLastCellNum());
+				if (null != row) {
+					for (int k = 0; k < row.getLastCellNum(); k++) {
+						HSSFCell cell = row.getCell(k);
+						if (null != cell) {
+							if(k>0)
+								row_head += ","; 
+								row_head += ExcelUtils.getCellValue(cell); 
+						} else {
+							System.out.print("单元格不存在[行号"+j+" 列"+k+"]");
+						}
+					}
+				}
+				// System.out.println();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			return row_head;
+		} 
+	}
+
+	
+	
+	
+	
+	/**
+	 * 功能：获取WEB-INF下xls下的excel模板的物理路径
+	 * 
+	 * @param tpl
+	 * @return
+	 */
+	private static String getXlsPath(String tpl, HttpServletRequest req) {
+		String se = File.separator;
+		//获取项目的绝对路径
+		String path=req.getSession().getServletContext().getRealPath("/");
+		return path+ "WEB-INF" + se + "xls" + se + tpl;
+	}
+
+	
+	
+	
+	
+	/**
+	 * 获取生成的xls 文件的物理路径
+	 * @param dlName
+	 * @return
+	 */
+	private static String getGenerateXlsPath(String dlName,
+			HttpServletRequest req) {
+		String se = File.separator;
+		//获取项目的绝对路径
+		String path=req.getSession().getServletContext().getRealPath("/");
+		return path + "dload" + se + dlName;
+	}
+
+	
+	/**
+	 * 根据导出结果 模板 导出文件 导出excel
+	 * @param map
+	 * @param tpl
+	 * @param dlName
+	 * @param response
+	 * @return
+	 */
+	public static String export(Map map, String tpl, String dlName,
+			HttpServletRequest req) {
+		try {
+			XLSTransformer transformer = new XLSTransformer();
+
+			// 判断文件夹是否存在 不存在就创建
+			File folder = new File(ExcelUtils.getXlsPath(tpl, req));
+			if (!folder.exists()) {
+				System.out.println("模板不存在：" + ExcelUtils.getXlsPath(tpl, req));
+			}
+
+			// 要导出的文件
+			File excelFolder = new File(ExcelUtils.getGenerateXlsPath("", req));
+			if (!excelFolder.exists()) {
+				excelFolder.mkdir();
+			}
+			if (!excelFolder.exists()) {
+				System.out.println("导出的文件目录不存在"
+						+ ExcelUtils.getGenerateXlsPath("", req));
+			}
+			File excel = new File(ExcelUtils.getGenerateXlsPath(dlName, req));
+			if (!excel.exists()) {
+				excel.createNewFile();
+			}
+			if (!excel.exists()) {
+				System.out.println("导出文件创建失败"
+						+ ExcelUtils.getGenerateXlsPath(dlName, req));
+			}
+			transformer.transformXLS(ExcelUtils.getXlsPath(tpl, req), map,ExcelUtils.getGenerateXlsPath(dlName, req));
+			return ExcelUtils.getGenerateXlsPath(dlName, req);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	/**
+	 * 读取excel数据
+	 * @param map
+	 * @param xls
+	 * @return
+	 */
+	public static List<Map> importExcel(String fields, String xls) {
+		List<Map> lstMap = new ArrayList();
+		if (fields == null || (fields != null && fields.trim().length() == 0)) {
+			return lstMap;
+		}
+		String[] field = fields.split(",");
+		try {
+			InputStream is = new FileInputStream(xls);
+			HSSFWorkbook hwb = new HSSFWorkbook(is);
+			HSSFSheet sheet = hwb.getSheetAt(0);
+			int rowCount = sheet.getLastRowNum();
+			int rowCellCount = sheet.getRow(0).getLastCellNum();
+
+			if (rowCount > 0 && rowCellCount > 0) {
+				for (int i = 0; i <= rowCount; i++) {
+					HSSFRow row = sheet.getRow(i);
+					Map mapBean = new HashMap();
+					for (int j = 0; j < rowCellCount; j++) {
+
+						HSSFCell cell = row.getCell(j);
+						if (cell == null) {
+							continue;
+						}
+						switch (cell.getCellType()) {
+						case HSSFCell.CELL_TYPE_NUMERIC:
+							mapBean.put(field[j], cell.getNumericCellValue());
+							break;
+						case HSSFCell.CELL_TYPE_STRING:
+							mapBean.put(field[j], cell.getStringCellValue());
+							break;
+						case HSSFCell.CELL_TYPE_BOOLEAN:
+							mapBean.put(field[j], cell.getBooleanCellValue());
+							break;
+						case HSSFCell.CELL_TYPE_FORMULA:
+							mapBean.put(field[j], cell.getCellFormula());
+							break;
+						default:
+							System.out.println("unsuported sell type");
+							break;
+						}
+						lstMap.add(mapBean);
+					}
+				}
+			}
+		} catch (RuntimeException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return lstMap;
+	}
+	
+	/**
+	 * @comment: 导出Excel
+	 * @param header 表头
+	 * @param lst_data 数据
+	 * @param ename 工作簿名称
+	 * @param req
+	 * @author: 傅里叶级数
+	 */
+	public static String export(Map<String,Object> header,
+			List<Map<String,Object>> lst_data,
+			String ename,
+			HttpServletRequest req){
+		
+		if(header == null || header.size() <=0)
+		{
+			System.out.println("没有导出的表头");
+			return ""; 
+		}	
+		
+		if(lst_data == null ||lst_data.size() <=0)
+		{
+			System.out.println("没有导出的数据");
+			return ""; 
+		} 
+		ename = StringUtils.isEmpty(ename)?"sheet1":ename;
+		
+		// 创建Excel的工作书册 Workbook,对应到一个excel文档
+        HSSFWorkbook wb = new HSSFWorkbook(); 
+        // 创建Excel的工作sheet,对应到一个excel文档的tab
+        HSSFSheet sheet = wb.createSheet(ename);  
+
+        // 创建Excel的sheet的一行
+        HSSFRow row = sheet.createRow(0);
+        int a = 0;
+        //写头   
+        for(String key : header.keySet()) 
+        { 
+	        // 创建一个Excel的单元格
+	        HSSFCell cell = row.createCell(a); 
+	        cell.setCellValue(header.get(key).toString());  
+	        a++;
+        } 
+		//写数据
+		for(int b=0;b<lst_data.size();b++)
+		{
+			 try { 
+				Map<String,Object> row_data = lst_data.get(b);
+				 HSSFRow row_cells= sheet.createRow(b+1);
+				 int c = 0;
+				 for(String key : header.keySet()) 
+				 { 
+				    try { 
+						// 创建一个Excel的单元格
+						HSSFCell cell = row_cells.createCell(c); 
+						Object obj_value = row_data.get(key);
+						if(obj_value != null) 
+							cell.setCellValue(obj_value.toString());
+						else
+							cell.setCellValue("");
+					} catch (Exception e) { 
+						e.printStackTrace(); 
+						System.out.println("错误的key:"+key);
+						continue;
+					} 
+				    c++;
+				 } 
+			} catch (Exception e) { 
+				e.printStackTrace();
+				System.out.println("错误的行:"+b);
+				continue;
+			}
+		}
+        
+        String saveUri = req.getSession().getServletContext().getRealPath("dload");  
+        saveUri  = saveUri + ReqUtils.nanoNum()+".xls";
+        System.out.println("导出文件"+saveUri);
+        try 
+        { 
+			FileOutputStream os = new FileOutputStream(saveUri);
+			wb.write(os);
+			os.close();
+		} catch (FileNotFoundException e) { 
+			e.printStackTrace();
+		} catch (IOException e) { 
+			e.printStackTrace();
+		} 
+		return saveUri; 
+	} 
+	
+	/**
+	 * @comment: 原样获取xls表格里面的数据
+	 * @param: 
+	 * @author: 傅里叶级数
+	 */
+	public static String getCellValueNotReplac(Cell cell) { 
+		switch (cell.getCellType()) {
+			case HSSFCell.CELL_TYPE_NUMERIC:
+				java.text.DecimalFormat  df=new   java.text.DecimalFormat("#.####");   
+				return df.format(cell.getNumericCellValue());
+			case HSSFCell.CELL_TYPE_STRING:
+				return String.valueOf(cell.getStringCellValue());
+			case HSSFCell.CELL_TYPE_BOOLEAN:
+				return String.valueOf(cell.getBooleanCellValue());
+			case HSSFCell.CELL_TYPE_FORMULA:
+				return String.valueOf(cell.getCellFormula());
+			default:
+				System.out.println("unsuported sell type");
+				break;
+		}
+		return "";
+	}
+
+	
+}

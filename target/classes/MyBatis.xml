@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<!-- (1) cacheModelsEnabled: 是否启用SqlMapClient上的缓存机制。建议设为"true"。默认值为“true”。 
+		(2) enhancementEnabled: 是否针对POJO启用字节码增强机制以提升getter/setter的调用效能，避免使用JavaReflect所带来的性能开销。同时，这也为Lazy 
+		Loading带来了极大的性能提升。建议设为"true"。默认值为“false”。 (3) errorTracingEnabled：是否启用错误日志，在开发期间建议设为"true"以方便调试。默认值为“false”。 
+		(4) lazyLoadingEnabled：是否启用延迟加载机制，建议设为"true"。默认值为“tue”。 (5) maxRequests：最大并发请求数（Statement并发数）。默认值为“512”。 
+		同时执行 SQL 语句的最大线程数。大于这个值的线程将阻塞直到另一个线程执行完成。不同的 DBMS有不同的限制值，但任何数据库都有这些限制。通常这个值应该至少是maxTransactions（参见以下）的 
+		10 倍，并且总是大于 maxSessions 和maxTranactions。减小这个参数值通常能提高性能。 (6) maxTransactions：最大并发事务数。默认值为“32”。 
+		同时进入 SqlMapClient.startTransaction()的最大线程maxTransactions 数。大于这个值的线程将阻塞直到另一个线程退出。不同的 
+		DBMS 有不同的限制值，但任何数据库都有这些限制。这个参数值应该总是小于或等于maxSessions 并总是远远小于 maxRequests。减小这个参数值通常能提高性能。 
+		(7) maxSessions：最大Session 数。即当前最大允许的并发SqlMapClient数。maxSessions设定必须介于maxTransactions和maxRequests之间，即maxTransactions<maxSessions=<maxRequests。默认值为“128”。 
+		同一时间内活动的最大 session 数。一个 session 可以maxSessions是代码请求的显式 session，也可以是当线程使用SqlMapClient 
+		实例（即执行一条语句）自动获得的session。它应该总是大于或等于 maxTransactions 并小于 maxRequests。减小这个参数值通常能减少内存使用。 
+		(8) useStatementNamespaces：是否使用Statement命名空间。这里的命名空间指的是映射文件中，sqlMap节点的namespace属性，如在上例中针对t_user表的映射文件sqlMap节点：<sqlMap 
+		namespace="User">这里，指定了此sqlMap节点下定义的操作均从属于"User"命名空间。在useStatementNamespaces="true"的情况下，Statement调用需追加命名空间，如：sqlMap.update("User.updateUser",user);否则直接通过Statement名称调用即可，如：sqlMap.update("updateUser",user);但请注意此时需要保证所有映射文件中，Statement定义无重名。默认值为“false”。 
+		(9) defaultStatementTimeout 此设置值必须为一个整数，作为JDBC连接超时的时间，这个值可以被任意一个映射文件的statement属性来重新设置， 
+		如果没有指明，查询将无超时时间限制除非在映射文件中设置statement属性值。被设置的值以秒为单位等待连接失效 (10) classInfoCacheEnabled 
+		With this setting enabled, iBATIS will maintain a cache of introspected classes. 
+		This will lead to a significant reduction in startup time if many classes 
+		are reused. 例如: classInfoCacheEnabled=“true” 默认值: true (启用) (11) statementCachingEnabled 
+		(iBATIS 2.3.0以后版本中有) With this setting enabled, iBATIS will maintain a local 
+		cache of prepared statements. This can lead to significant performance improvements. 
+		例如: statementCachingEnabled=“true” 默认值: true (启用) -->
+	<settings>  
+		<!-- 全局映射器启用缓存 -->  
+		<setting name="cacheEnabled" value="false" />  
+		<!-- 查询时，关闭关联对象即时加载以提高性能 -->  
+		<setting name="lazyLoadingEnabled" value="true" />  
+		<!-- 设置关联对象加载的形态，此处为按需加载字段(加载字段由SQL指 定)，
+			不会加载关联表的所有字段，以提高性能 -->  
+		<setting name="aggressiveLazyLoading" value="false" />
+		<!-- 对于未知的SQL查询，允许返回不同的结果集以达到通用的效果 -->  
+		<setting name="multipleResultSetsEnabled" value="true" />  
+		<!-- 允许使用列标签代替列名 -->  
+		<setting name="useColumnLabel" value="true" />  
+		<!-- 允许使用自定义的主键值(比如由程序生成的UUID 32位编码作为键值)，
+			数据表的PK生成策略将被覆盖 -->  
+		<setting name="useGeneratedKeys" value="true" />  
+		<!-- 给予被嵌套的resultMap以字段-属性的映射支持 -->  
+		<setting name="autoMappingBehavior" value="FULL" />  
+		<!-- 对于批量更新操作缓存SQL以提高性能 -->  
+		<setting name="defaultExecutorType" value="BATCH" />  
+		<!-- 数据库超过25000毫秒仍未响应则超时 -->  
+		<setting name="defaultStatementTimeout" value="25000" />  
+	</settings>
+</configuration>

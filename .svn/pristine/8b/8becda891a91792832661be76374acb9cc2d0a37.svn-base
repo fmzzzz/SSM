@@ -1,0 +1,273 @@
+package zh.campus.Controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import zh.beans.CampusBean;
+import zh.campus.Service.CampusInfoListPageService;
+import zh.utils.ReqUtils;
+import zh.utils.UtilDate;
+
+@Controller
+public class CampusInfoListPageController {
+
+
+	@Resource
+	private CampusInfoListPageService caListPageService;
+	
+	/*
+	 * 日志
+	 */
+	private Logger logger = LogManager.getLogger(CampusInfoListPageController.class);
+	
+	
+	
+	
+	
+	/**
+	 * @comment:学校信息分页查询
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月27日下午6:27:23
+	 */
+	@RequestMapping("/findListCount_campus")
+	public void findListCount_campus(HttpServletRequest req, HttpServletResponse res) {
+		/**
+		 * 获取查询条件
+		 */
+		String pccode = req.getParameter("pccode");
+		String ctcode = req.getParameter("ctcode");
+		String aacode = req.getParameter("aacode");
+		String csname = req.getParameter("csname");
+		//获取分页条件
+		int page =Integer.parseInt(StringUtils.isEmpty(req.getParameter("page"))?"1":req.getParameter("page").trim());
+		// 取多少条数据
+		int rows =Integer.parseInt(StringUtils.isEmpty(req.getParameter("rows"))?"25":req.getParameter("rows").trim());
+		// 要获取的起始位置
+		int rownum=(page-1)*rows;
+		
+		/**
+		 * 获取分页数据
+		 */
+		List<Map<String,Object>> listPage = new ArrayList<>();
+		try {
+			listPage = caListPageService.findCampusListPage(pccode, ctcode, aacode, csname, rownum, rows);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoController---调用findListCount_campus---caListPageService---findCampusListPage---系统异常");
+			ReqUtils.backing_out_jsonArray_page(0, new ArrayList<Map<String, Object>>(), res);
+			return;
+		}
+		
+		/**
+		 * 查询该条件下的数据总条数
+		 */
+		int count = Integer.MIN_VALUE;
+		try {
+			count = caListPageService.countCampusListPage(pccode, ctcode, aacode, csname);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoController---调用findListCount_campus---caListPageService---countCampusListPage---系统异常");
+			ReqUtils.backing_out_jsonArray_page(0, new ArrayList<Map<String, Object>>(), res);
+			return;
+		}
+		ReqUtils.backing_out_jsonArray_page(count, listPage, res);
+	}
+	
+	
+	
+	
+	/**
+	 * @comment: 学校信息单条删除
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日上午11:22:55
+	 */
+	@RequestMapping("/delCampus_campus")
+	public void delCampus_campus(HttpServletRequest req, HttpServletResponse res) {
+		//定义返回结果
+		String result ="";
+		// 获取参数
+		String  csid = req.getParameter("csid");
+		if(StringUtils.isEmpty(csid)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		try {
+			result = caListPageService.deleteCampusByCsid(csid);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoController---调用delCampus_campus---caListPageService---deleteCampusByCsid---系统异常");
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		ReqUtils.backing_out_jsonArray(result, res);
+		return;
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * @comment: 点击查看学校详细信息
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日下午4:14:35
+	 */
+	@RequestMapping("/findCampusByCsid_campus")
+	public void findCampusByCsid_campus(HttpServletRequest req, HttpServletResponse res) {
+		String csid = req.getParameter("csid");
+		if(StringUtils.isEmpty(csid)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		Map<String,Object> csMap = new HashMap<>();
+		try {
+			csMap = caListPageService.findCampusByCsid_campus(csid);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoController---调用findCampusByCsid_campus---caListPageService---findCampusByCsid_campus---系统异常");
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		ReqUtils.backing_out_jsonArray(csMap, res);
+		return;
+	}
+	
+	
+	
+	/**
+	 * @comment: 学校信息编辑保存
+	 * @param: 
+	 * @author: 傅里叶级数
+	 * @date 2018年11月28日下午5:51:00
+	 */
+	@RequestMapping("/editCampus_campus")
+	public void editCampus_campus(HttpServletRequest req, HttpServletResponse res) {
+		/**
+		 * 获取参数
+		 */
+		String pccode = req.getParameter("pccode");
+		String ctcode = req.getParameter("ctcode");
+		String aacode = req.getParameter("aacode");
+		String csname = req.getParameter("csname");
+		String cscode = req.getParameter("cscode");
+		String createyear = req.getParameter("createyear");
+		String csotname = req.getParameter("csotname");
+		String csproerty = req.getParameter("csproerty");
+		String csaddres = req.getParameter("csaddres");
+		String cstelnum = req.getParameter("cstelnum");
+		String principal = req.getParameter("principal");
+		String prnum = req.getParameter("prnum");
+		String charger = req.getParameter("charger");
+		String chagejob = req.getParameter("chagejob");
+		String chrgtelnum = req.getParameter("chrgtelnum");
+		String email = req.getParameter("email");
+		String postcode = req.getParameter("postcode");
+		String csintro = req.getParameter("csintro");
+		String csid = req.getParameter("csid");
+		/**
+		 * 参数校验
+		 */
+		if(StringUtils.isEmpty(pccode)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请选择省'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(ctcode)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请选择市'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(aacode)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请选择县/区'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(csname)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校名称'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(cscode)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校标识码'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(createyear)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校创办年份'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(csotname)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校别名'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(csproerty)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请选择学校性质'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(csaddres)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校地址'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(cstelnum)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写学校电话'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(principal)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写校长姓名'}", res);
+			return;
+		}
+		if(StringUtils.isEmpty(prnum)) {
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'请填写校长联系电话'}", res);
+			return;
+		}
+		/**
+		 * 参数封装
+		 */
+		CampusBean campusBean = new CampusBean();
+		campusBean.setPccode(pccode);
+		campusBean.setCtcode(ctcode);
+		campusBean.setAacode(aacode);
+		campusBean.setCsid(csid);
+		campusBean.setCsname(csname);
+		campusBean.setCscode(cscode);
+		campusBean.setCreateyear(createyear);
+		campusBean.setCsotname(csotname);
+		campusBean.setCsproerty(Integer.parseInt(csproerty));
+		campusBean.setCsaddres(csaddres);
+		campusBean.setCstelnum(cstelnum);
+		campusBean.setPrincipal(principal);
+		campusBean.setPrnum(prnum);
+		campusBean.setCharger(charger);
+		campusBean.setChagejob(chagejob);
+		campusBean.setChrgtelnum(chrgtelnum);
+		campusBean.setEmail(email);
+		campusBean.setPostcode(postcode);
+		campusBean.setCsintro(csintro);
+		campusBean.setAddtime(UtilDate.getYMdHms());
+		
+		// 结果
+		String result ="";
+		try {
+			result = caListPageService.editCampus_campus(campusBean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("CampusInfoController---调用editCampus_campus---caListPageService---editCampus_campus---系统异常");
+			ReqUtils.backing_out_jsonArray("{result:'500',msg:'系统异常，请联系管理员'}", res);
+			return;
+		}
+		ReqUtils.backing_out_jsonArray(result, res);
+		return;
+	}
+}
